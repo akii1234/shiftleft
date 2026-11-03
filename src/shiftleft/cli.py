@@ -9,6 +9,7 @@ import typer
 
 from shiftleft.config import load_config
 from shiftleft.git import get_changed_files
+from shiftleft.hook import install_hook, create_default_config
 from shiftleft.orchestrator import run_scans
 from shiftleft.output import format_results, should_block
 from shiftleft.scanners.registry import ScannerRegistry
@@ -35,8 +36,22 @@ def init(
     global_: bool = typer.Option(False, "--global", help="Install globally"),
 ) -> None:
     """Create config file and install pre-push hook. (Task 12)"""
-    typer.echo("init: not yet implemented")
-    raise typer.Exit(code=0)
+    repo_path = Path.cwd()
+
+    try:
+        # Create default config
+        config_path = create_default_config(repo_path)
+        typer.echo(f"Created config file: {config_path}")
+
+        # Install pre-push hook
+        hook_path = install_hook(repo_path, global_install=global_)
+        typer.echo(f"Installed pre-push hook: {hook_path}")
+
+        typer.echo("ShiftLeft Gateway initialized successfully!")
+        raise typer.Exit(code=0)
+    except FileNotFoundError as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(code=1)
 
 
 @app.command()
