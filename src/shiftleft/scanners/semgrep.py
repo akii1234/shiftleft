@@ -49,11 +49,6 @@ class SemgrepScanner(BaseScanner):
 
             duration = time.time() - start_time
 
-            # Parse output
-            if result.returncode != 0:
-                # Semgrep returns non-zero on findings; try to parse anyway
-                pass
-
             try:
                 findings = self._parse_output(result.stdout)
             except (json.JSONDecodeError, KeyError) as e:

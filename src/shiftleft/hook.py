@@ -1,10 +1,17 @@
 """Pre-push hook installation and default configuration creation."""
 
-import shutil
 from pathlib import Path
 import yaml
 
 from shiftleft.config import DEFAULT_CONFIG
+
+
+_HOOK_SCRIPT = """\
+#!/bin/sh
+# ShiftLeft Gateway pre-push hook
+shiftleft scan
+exit $?
+"""
 
 
 def install_hook(repo_path: Path, global_install: bool = False) -> Path:
@@ -28,15 +35,9 @@ def install_hook(repo_path: Path, global_install: bool = False) -> Path:
     if not git_dir.exists():
         raise FileNotFoundError(f"Git hooks directory not found: {git_dir}")
 
-    # Find the template hook script
-    hook_template = Path(__file__).parent.parent.parent / "hooks" / "pre-push"
-
-    if not hook_template.exists():
-        raise FileNotFoundError(f"Hook template not found: {hook_template}")
-
-    # Copy hook to destination
+    # Write hook script to destination
     hook_dest = git_dir / "pre-push"
-    shutil.copy2(hook_template, hook_dest)
+    hook_dest.write_text(_HOOK_SCRIPT)
 
     # Make executable
     hook_dest.chmod(hook_dest.stat().st_mode | 0o111)

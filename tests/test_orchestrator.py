@@ -1,4 +1,3 @@
-import asyncio
 from pathlib import Path
 from unittest.mock import MagicMock
 from shiftleft.orchestrator import run_scans, OrchestratorResult
@@ -33,8 +32,9 @@ def test_run_scans_empty_registry():
 
 def test_run_scans_aggregates_findings():
     reg = ScannerRegistry()
-    reg.register(_make_scanner("s1", [_finding("s1")]))
-    reg.register(_make_scanner("s2", [_finding("s2"), _finding("s2")]))
+    # Use scanner names present in DEFAULT_CONFIG so get_for_tier returns them
+    reg.register(_make_scanner("semgrep", [_finding("semgrep")]))
+    reg.register(_make_scanner("bandit", [_finding("bandit"), _finding("bandit")]))
     config = load_config(None)
     result = run_scans([Path("a.py")], config, reg)
     assert len(result.total_findings) == 3
@@ -43,7 +43,7 @@ def test_run_scans_aggregates_findings():
 
 def test_run_scans_handles_scanner_failure():
     class FailScanner(BaseScanner):
-        name = "fail"
+        name = "gitleaks"
         supported_languages = set()
         def is_installed(self): return True
         def scan(self, files, config): raise RuntimeError("boom")

@@ -41,9 +41,10 @@ def test_bandit_parse_output():
     assert findings[0].cwe == "CWE-78"
     assert findings[0].rule_id == "B102"
 
-def test_bandit_scan_skips_if_no_python_files(tmp_path):
+def test_bandit_scan_skips_if_no_files(tmp_path):
+    # Orchestrator pre-filters files; scan() receives an already-filtered empty list
     s = BanditScanner()
-    result = s.scan([tmp_path / "app.js"], _config())
+    result = s.scan([], _config())
     assert result.success is True
     assert result.findings == []
     assert result.duration_seconds == 0.0

@@ -44,11 +44,8 @@ class BanditScanner(BaseScanner):
         """
         start_time = time.time()
 
-        # Filter files to only Python files
-        filtered_files = self.filter_files(files)
-
         # If no Python files, return success immediately
-        if not filtered_files:
+        if not files:
             return ScanResult(
                 scanner=self.name,
                 findings=[],
@@ -60,7 +57,7 @@ class BanditScanner(BaseScanner):
         try:
             # Build command: bandit -f json -r <files>
             cmd = ["bandit", "-f", "json", "-r"]
-            cmd.extend(str(f) for f in filtered_files)
+            cmd.extend(str(f) for f in files)
 
             # Run bandit
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)

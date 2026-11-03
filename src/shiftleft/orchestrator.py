@@ -37,21 +37,8 @@ def run_scans(
     """
     start_time = time.time()
 
-    # Get all registered scanners and filter those that should run
-    scanners = []
-    for scanner in registry._scanners.values():
-        # Check if scanner is installed
-        if not scanner.is_installed():
-            continue
-
-        # Check if scanner is in config and matches tier
-        if scanner.name in config.scanners:
-            scanner_config = config.scanners[scanner.name]
-            if scanner_config.tier == tier and scanner_config.enabled:
-                scanners.append(scanner)
-        else:
-            # Scanner not in config - run it anyway if installed
-            scanners.append(scanner)
+    # Get all enabled scanners for the requested tier via the registry
+    scanners = registry.get_for_tier(tier, config)
 
     results: list[ScanResult] = []
     total_findings: list[Finding] = []

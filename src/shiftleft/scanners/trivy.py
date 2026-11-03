@@ -1,4 +1,5 @@
 import json
+import os
 import shutil
 import subprocess
 import time
@@ -44,20 +45,11 @@ class TrivyScanner(BaseScanner):
                 )
 
             # Find common parent directory
-            repo_path = Path.cwd()
-            if len(files) > 0:
-                # Start with the first file's parent
-                common_path = files[0].parent
-                # Find the deepest common parent
-                for file in files[1:]:
-                    # Find the common ancestor
-                    try:
-                        common_path = Path(*[p for p in common_path.parts
-                                            if p in file.parts][:len(common_path.parts)])
-                    except Exception:
-                        common_path = Path.cwd()
-                        break
-                repo_path = common_path if common_path.is_dir() else Path.cwd()
+            try:
+                common = Path(os.path.commonpath([str(f) for f in files]))
+                repo_path = common if common.is_dir() else common.parent
+            except ValueError:
+                repo_path = Path.cwd()
 
             # Build command: trivy fs --format json --scanners vuln <repo_path>
             cmd = [
